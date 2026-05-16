@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth';
 import { pool } from '@/lib/db';
-
+import { PoolClient } from 'pg';
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 }
 
 async function fixConversationParticipants(conversationId: string, userId: string) {
-  const client = await pool.connect();
+  const client = await pool.connect() as PoolClient;
   try {
     // Check if user is already a participant
     const existing = await client.query(

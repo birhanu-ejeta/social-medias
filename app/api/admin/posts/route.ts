@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/auth';
 import { pool } from '@/lib/db';
-
+import { PoolClient } from 'pg';
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -121,7 +121,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    const client = await pool.connect();
+    const client = await pool.connect() as PoolClient;
     try {
       await client.query('BEGIN');
 

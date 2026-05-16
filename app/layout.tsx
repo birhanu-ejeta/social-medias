@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { GeistSans, GeistMono } from 'geist/font';
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
-
-const inter = Inter({ subsets: ['latin'] });
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: 'SocialFlow - Connect with the world',
@@ -17,8 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html 
+      lang="en" 
+      suppressHydrationWarning 
+      className={cn(GeistSans.variable, GeistMono.variable)}
+    >
+      <body className={cn("font-sans antialiased", GeistSans.className)}>
         <Providers>
           {children}
           <Toaster position="top-right" />

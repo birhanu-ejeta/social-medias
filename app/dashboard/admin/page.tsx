@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
   Users,
   FileText,
@@ -12,6 +11,7 @@ import {
   Activity,
   Loader2,
 } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -29,6 +29,7 @@ import { toast } from 'react-hot-toast';
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [recentReports, setRecentReports] = useState<any[]>([]);
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (status === 'loading') return;
+
     if (!session) {
       router.push('/login');
     } else if (!session.user?.is_admin) {
@@ -49,16 +51,15 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Fetch stats, recent reports, and analytics in parallel
       const [statsRes, reportsRes, analyticsRes] = await Promise.all([
         fetch('/api/admin/stats'),
         fetch('/api/admin/reports?status=pending&limit=5'),
         fetch('/api/admin/analytics'),
       ]);
 
-      if (!statsRes.ok) throw new Error('Failed to fetch stats');
-      if (!reportsRes.ok) throw new Error('Failed to fetch reports');
-      if (!analyticsRes.ok) throw new Error('Failed to fetch analytics');
+      if (!statsRes.ok || !reportsRes.ok || !analyticsRes.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
 
       const statsData = await statsRes.json();
       const reportsData = await reportsRes.json();
@@ -86,54 +87,22 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Users"
-          value={stats?.totalUsers || 0}
-          icon={Users}
-          color="bg-blue-500"
-        />
-        <StatCard
-          title="Total Posts"
-          value={stats?.totalPosts || 0}
-          icon={FileText}
-          color="bg-purple-500"
-        />
-        <StatCard
-          title="Total Comments"
-          value={stats?.totalComments || 0}
-          icon={MessageCircle}
-          color="bg-green-500"
-        />
-        <StatCard
-          title="Pending Reports"
-          value={stats?.pendingReports || 0}
-          icon={AlertTriangle}
-          color="bg-red-500"
-        />
+        <StatCard title="Total Users" value={stats?.totalUsers || 0} icon={Users} color="bg-blue-500" />
+        <StatCard title="Total Posts" value={stats?.totalPosts || 0} icon={FileText} color="bg-purple-500" />
+        <StatCard title="Total Comments" value={stats?.totalComments || 0} icon={MessageCircle} color="bg-green-500" />
+        <StatCard title="Pending Reports" value={stats?.pendingReports || 0} icon={AlertTriangle} color="bg-red-500" />
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          title="New Users Today"
-          value={stats?.newUsersToday || 0}
-          icon={Users}
-          color="bg-cyan-500"
-        />
-        <StatCard
-          title="Posts Today"
-          value={stats?.postsToday || 0}
-          icon={FileText}
-          color="bg-indigo-500"
-        />
-        <StatCard
-          title="Active Sessions"
-          value={stats?.activeSessions || 0}
-          icon={Activity}
-          color="bg-emerald-500"
-        />
+        <StatCard title="New Users Today" value={stats?.newUsersToday || 0} icon={Users} color="bg-cyan-500" />
+        <StatCard title="Posts Today" value={stats?.postsToday || 0} icon={FileText} color="bg-indigo-500" />
+        <StatCard title="Active Sessions" value={stats?.activeSessions || 0} icon={Activity} color="bg-emerald-500" />
       </div>
 
       {/* User Growth Chart */}
@@ -149,7 +118,7 @@ export default function AdminDashboard() {
                 <XAxis dataKey="date" />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#8884d8" name="New Users" />
+                <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -163,24 +132,26 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           {recentReports.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-8">No pending reports</p>
+            <p className="text-sm text-gray-500 text-center py-12">No pending reports at the moment</p>
           ) : (
             <div className="space-y-4">
               {recentReports.map((report: any) => (
                 <div key={report.id} className="flex items-start justify-between border-b pb-4 last:border-0 last:pb-0">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Avatar src={report.reporter_avatar} alt={report.reporter_username} size="sm" />
-                      <span className="font-medium text-sm">@{report.reporter_username}</span>
-                      <Badge variant="outline" className="capitalize text-xs">
-                        {report.reason}
-                      </Badge>
+                    <div className="flex items-center gap-3 mb-2">
+                      <Avatar src={report.reporter_avatar} alt={report.reporter_username} className="h-8 w-8" />
+                      <div>
+                        <span className="font-medium">@{report.reporter_username}</span>
+                        <Badge variant="outline" className="ml-2 text-xs capitalize">
+                          {report.reason}
+                        </Badge>
+                      </div>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                      {report.description || 'No description'}
+                      {report.description || 'No description provided'}
                     </p>
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
                     {new Date(report.created_at).toLocaleDateString()}
                   </span>
                 </div>
@@ -193,7 +164,7 @@ export default function AdminDashboard() {
       {/* Top Posts */}
       <Card>
         <CardHeader>
-          <CardTitle>Top Posts</CardTitle>
+          <CardTitle>Top Performing Posts</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -210,7 +181,7 @@ export default function AdminDashboard() {
                 {topPosts.map((post: any) => (
                   <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-4">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <img src={post.avatar_url} alt={post.username} className="w-8 h-8 rounded-full" />
                         <span className="text-sm font-medium">{post.full_name || post.username}</span>
                       </div>
@@ -218,8 +189,8 @@ export default function AdminDashboard() {
                     <td className="px-4 py-4 max-w-xs">
                       <p className="text-sm line-clamp-2">{post.content}</p>
                     </td>
-                    <td className="px-4 py-4 text-sm">{post.likes_count}</td>
-                    <td className="px-4 py-4 text-sm">{post.comments_count}</td>
+                    <td className="px-4 py-4 text-sm font-medium">{post.likes_count}</td>
+                    <td className="px-4 py-4 text-sm font-medium">{post.comments_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -231,7 +202,7 @@ export default function AdminDashboard() {
   );
 }
 
-// Small stat card component
+// Stat Card Component
 function StatCard({
   title,
   value,
@@ -245,16 +216,15 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardContent className="p-4 flex items-center gap-4">
-        <div className={`p-2 rounded-lg ${color}`}>
-          <Icon className="h-5 w-5 text-white" />
+      <CardContent className="p-6 flex items-center gap-4">
+        <div className={`p-3 rounded-xl ${color}`}>
+          <Icon className="h-6 w-6 text-white" />
         </div>
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold">{value.toLocaleString()}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+          <p className="text-3xl font-bold mt-1">{value.toLocaleString()}</p>
         </div>
       </CardContent>
     </Card>
   );
 }
-

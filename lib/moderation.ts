@@ -4,7 +4,16 @@ import { checkHateSpeech } from './hateSpeech';
 const AUTO_BLOCK_THRESHOLD = 0.90;
 const AUTO_FLAG_THRESHOLD = 0.70;
 
-export async function moderateContent(text: string) {
+export interface ModerationResult {
+  allowed: boolean;
+  flagged: boolean;
+  message: string | null;
+  score: number;
+  categories: string[];
+  language: string;
+}
+
+export async function moderateContent(text: string): Promise<ModerationResult> {
   const result = await checkHateSpeech(text);
 
   if (!result.success || !result.data) {
@@ -14,14 +23,15 @@ export async function moderateContent(text: string) {
       flagged: false,
       message: null,
       score: 0,
-      categories: []
+      categories: [],
+      language: ''
     };
   }
 
   const score = result.data.toxicity_score;
   const categories = result.data.toxic_categories || [];
 
-  let message = null;
+  let message: string | null = null;
   let allowed = true;
   let flagged = false;
 
@@ -39,6 +49,6 @@ export async function moderateContent(text: string) {
     message,
     score,
     categories,
-    language: result.data.language
+    language: result.data.language || ''
   };
 }
