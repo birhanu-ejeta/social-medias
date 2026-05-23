@@ -61,6 +61,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
   const [showAllComments, setShowAllComments] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState<Record<string, string>>({});
+  const [showLikeAnimation, setShowLikeAnimation] = useState(false);
 
   const visibilityIcons = {
     public: <Globe className="h-4 w-4" />,
@@ -79,6 +80,12 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
 
       setIsLiked(data.liked);
       setLikesCount((prev) => (data.liked ? prev + 1 : prev - 1));
+      
+      // Trigger heartbeat animation when liked
+      if (data.liked) {
+        setShowLikeAnimation(true);
+        setTimeout(() => setShowLikeAnimation(false), 600);
+      }
     } catch (error) {
       toast.error("Failed to update like");
     }
@@ -317,7 +324,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-4"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 transition-all duration-200 hover:shadow-lg"
     >
       {/* Post Header */}
       <div className="p-4 flex items-center justify-between">
@@ -461,21 +468,23 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
           <div className="flex items-center space-x-4">
             <button
               onClick={handleLike}
-              className="flex items-center space-x-1 hover:text-red-500 transition"
+              className="flex items-center space-x-1 hover:text-red-500 transition-colors duration-200"
             >
               <Heart
-                className={`h-5 w-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
+                className={`h-5 w-5 transition-all duration-200 ${
+                  showLikeAnimation ? 'animate-heartbeat' : ''
+                } ${isLiked ? "fill-red-500 text-red-500" : ""}`}
               />
               <span className="font-medium">{likesCount}</span>
             </button>
             <button
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center space-x-1 hover:text-blue-500 transition"
+              className="flex items-center space-x-1 hover:text-blue-500 transition-colors duration-200"
             >
               <MessageCircle className="h-5 w-5" />
               <span className="font-medium">{commentsCount}</span>
             </button>
-            <button className="flex items-center space-x-1 hover:text-green-500 transition">
+            <button className="flex items-center space-x-1 hover:text-green-500 transition-colors duration-200">
               <Share2 className="h-5 w-5" />
               <span className="font-medium">{post.shares_count || 0}</span>
             </button>

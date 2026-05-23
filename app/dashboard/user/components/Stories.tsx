@@ -60,11 +60,11 @@ export function Stories() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6 shadow-md border border-gray-200 dark:border-gray-700">
         <div className="flex space-x-4 overflow-x-auto pb-2">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="flex-shrink-0 text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 animate-pulse" />
               <div className="w-16 h-3 mt-2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
           ))}
@@ -75,7 +75,7 @@ export function Stories() {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-lg animate-slideInDown">
         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
           {/* Create Story Button */}
           <motion.div

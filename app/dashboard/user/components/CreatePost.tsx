@@ -29,7 +29,9 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isShaking, setIsShaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { startUpload } = useUploadThing('postMedia', {
     onUploadProgress: (p) => setUploadProgress(p),
@@ -68,6 +70,23 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
     }
   };
 
+  const clearInputOnViolation = () => {
+    // Immediately clear the input
+    setContent('');
+    setUploadedFiles([]);
+    setLocation('');
+    setTags('');
+    
+    // Trigger shake animation
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
+    
+    // Focus the textarea for re-engagement
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() && uploadedFiles.length === 0) return;
@@ -91,13 +110,18 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        // 🆕 SPECIAL HANDLING FOR HATE SPEECH BLOCK
+        // MODERATION VIOLATION HANDLING
         if (data.blocked) {
+          // Immediately clear the input and apply visual feedback
+          clearInputOnViolation();
+          
+          // Show primary error message
           toast.error(data.error, {
             duration: 6000,
             icon: '🚫',
           });
 
+          // Show detected categories if available
           if (data.toxic_categories?.length > 0) {
             toast.error(`Detected: ${data.toxic_categories.join(', ')}`, {
               duration: 5000,
@@ -105,12 +129,37 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
             });
           }
 
+          // Show toxicity score for transparency
           if (data.toxicity_score) {
             toast(`Toxicity Score: ${(data.toxicity_score * 100).toFixed(1)}%`, {
               icon: '📊',
               duration: 4000,
             });
           }
+
+          // Provide helpful link to community guidelines
+          setTimeout(() => {
+            toast(
+              (t) => (
+                <div className="flex items-center gap-2">
+                  <span>View our community guidelines</span>
+                  <a
+                    href="/guidelines"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-semibold text-sm"
+                    onClick={() => toast.dismiss(t.id)}
+                  >
+                    Learn more
+                  </a>
+                </div>
+              ),
+              {
+                duration: 8000,
+                icon: 'ℹ️',
+              }
+            );
+          }, 1500);
         } else {
           toast.error(data.error || 'Failed to create post');
         }
@@ -144,17 +193,20 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
   const SelectedVisibilityIcon = visibilityOptions.find(v => v.value === visibility)?.icon || Globe;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 mb-6 transition-all duration-200 hover:shadow-lg">
       <form onSubmit={handleSubmit}>
         <div className="flex items-start space-x-3">
           <Avatar src={user.avatar_url} alt={user.username} size="md" />
           <div className="flex-1">
             <textarea
+              ref={textareaRef}
               placeholder="What's on your mind?"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onFocus={() => setIsExpanded(true)}
-              className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700"
+              className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 transition-all ${
+                isShaking ? 'animate-shake border-red-500' : 'border-gray-200 dark:border-gray-700'
+              }`}
               rows={isExpanded ? 4 : 1}
               disabled={isSubmitting}
             />
@@ -208,7 +260,7 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
             {/* Expanded Options */}
             {isExpanded && (
               <div className="mt-4 space-y-3">
-                <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row gap-2">
                   <div className="flex-1 relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
@@ -216,7 +268,7 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
                       placeholder="Add location"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 transition-all"
                     />
                   </div>
                   <div className="flex-1 relative">

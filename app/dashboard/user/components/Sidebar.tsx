@@ -58,7 +58,7 @@ export function Sidebar({ user }: SidebarProps) {
   });
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sticky top-20">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sticky top-20 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-lg animate-slideInLeft">
       {/* User Info */}
       <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
         <Avatar src={user.avatar_url} alt={user.username} size="md" />

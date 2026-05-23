@@ -111,9 +111,9 @@ export function TrendingSidebar() {
   }
 
   return (
-    <div className="space-y-4 sticky top-20">
+    <div className="space-y-4 sticky top-20 animate-slideInRight">
       {/* Trending Topics */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-lg">
         <h2 className="font-semibold mb-3 flex items-center">
           <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
           Trending This Week
@@ -126,7 +126,7 @@ export function TrendingSidebar() {
               <Link
                 key={topic.id}
                 href={`/hashtag/${topic.name}`}
-                className="flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition"
+                className="flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors duration-200"
               >
                 <div className="flex items-center">
                   <Hash className="h-4 w-4 mr-2 text-gray-400" />
@@ -142,7 +142,7 @@ export function TrendingSidebar() {
       </div>
 
       {/* Suggested Users */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 hover:shadow-lg">
         <h2 className="font-semibold mb-3 flex items-center">
           <Users className="h-5 w-5 mr-2 text-purple-600" />
           Suggested for You
