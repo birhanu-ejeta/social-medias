@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { format } from "date-fns";
 import {
@@ -25,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
 import { pusherClient } from "@/lib/pusher";
+import { toast } from 'react-hot-toast';
 
 interface Message {
   id: string;
@@ -40,6 +42,7 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ userId }: ChatWindowProps) {
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const chatId = searchParams.get("chat");
 
@@ -62,8 +65,11 @@ export function ChatWindow({ userId }: ChatWindowProps) {
     const channel = pusherClient.subscribe(`chat-${chatId}`);
 
     channel.bind("new-message", (data: any) => {
-      setMessages((prev) => [...prev, data.message]);
-      scrollToBottom();
+      // Only add messages from other users (current user messages are added in sendMessage)
+      if (data.message && data.message.sender_id !== session?.user?.id) {
+        setMessages((prev) => [...prev, data.message]);
+        scrollToBottom();
+      }
     });
 
     channel.bind("message-read", (data: any) => {
@@ -135,7 +141,9 @@ export function ChatWindow({ userId }: ChatWindowProps) {
       const data = await response.json();
 
       if (response.ok) {
-        // Success: clear input
+        // Success: add message immediately to avoid double-add from Pusher
+        setMessages((prev) => [...prev, data]);
+        // Clear input
         setNewMessage("");
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -148,6 +156,13 @@ export function ChatWindow({ userId }: ChatWindowProps) {
         }
         setMessageBlocked(true);
         setTimeout(() => setMessageBlocked(false), 2000);
+        
+        // Show single clear message
+        const categories = data.toxic_categories?.length > 0 ? ` (${data.toxic_categories.join(', ')})` : '';
+        toast.error(`${data.error || 'Your message contains inappropriate content'}${categories}`, {
+          duration: 5000,
+          icon: '🚫',
+        });
       }
     } catch (error) {
       console.error("Failed to send message:", error);

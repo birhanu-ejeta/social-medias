@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, Home, Search, Heart, MessageCircle, User, LogOut } from "lucide-react";
+import { Menu, X, Home, Heart, MessageCircle, User, LogOut, Settings } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export function MobileMenu() {
@@ -36,14 +36,6 @@ export function MobileMenu() {
               <span>Home</span>
             </Link>
             <Link
-              href="/dashboard/user/explore"
-              className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              <Search className="h-5 w-5" />
-              <span>Explore</span>
-            </Link>
-            <Link
               href="/notifications"
               className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
               onClick={() => setIsOpen(false)}
@@ -59,20 +51,29 @@ export function MobileMenu() {
               <MessageCircle className="h-5 w-5" />
               <span>Messages</span>
             </Link>
+            <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
             <Link
-              href="/dashboard/user/profile"
+              href="/profile/[username]"
               className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
               onClick={() => setIsOpen(false)}
             >
               <User className="h-5 w-5" />
               <span>Profile</span>
             </Link>
+            <Link
+              href="/settings"
+              className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
+              onClick={() => setIsOpen(false)}
+            >
+              <Settings className="h-5 w-5" />
+              <span>Settings</span>
+            </Link>
             <button
               onClick={() => {
                 signOut();
                 setIsOpen(false);
               }}
-              className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
+              className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
             >
               <LogOut className="h-5 w-5" />
               <span>Logout</span>

@@ -122,51 +122,12 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
           // Reset blocked state after animation
           setTimeout(() => setIsBlocked(false), 2000);
           
-          // Show primary error message
-          toast.error(data.error, {
-            duration: 6000,
+          // Show single clear message with all relevant info
+          const categories = data.toxic_categories?.length > 0 ? ` (${data.toxic_categories.join(', ')})` : '';
+          toast.error(`${data.error || 'Your post contains inappropriate content'}${categories}. Please review our community guidelines.`, {
+            duration: 5000,
             icon: '🚫',
           });
-
-          // Show detected categories if available
-          if (data.toxic_categories?.length > 0) {
-            toast.error(`Detected: ${data.toxic_categories.join(', ')}`, {
-              duration: 5000,
-              icon: '⚠️',
-            });
-          }
-
-          // Show toxicity score for transparency
-          if (data.toxicity_score) {
-            toast(`Toxicity Score: ${(data.toxicity_score * 100).toFixed(1)}%`, {
-              icon: '📊',
-              duration: 4000,
-            });
-          }
-
-          // Provide helpful link to community guidelines
-          setTimeout(() => {
-            toast(
-              (t) => (
-                <div className="flex items-center gap-2">
-                  <span>View our community guidelines</span>
-                  <a
-                    href="/guidelines"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline font-semibold text-sm"
-                    onClick={() => toast.dismiss(t.id)}
-                  >
-                    Learn more
-                  </a>
-                </div>
-              ),
-              {
-                duration: 8000,
-                icon: 'ℹ️',
-              }
-            );
-          }, 1500);
         } else {
           toast.error(data.error || 'Failed to create post');
         }

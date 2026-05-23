@@ -228,23 +228,12 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
           setComment("");
           setTimeout(() => setCommentBlocked(false), 2000);
           
-          toast.error(data.error, {
-            duration: 6000,
+          // Show single clear message
+          const categories = data.toxic_categories?.length > 0 ? ` (${data.toxic_categories.join(', ')})` : '';
+          toast.error(`${data.error || 'Your comment contains inappropriate content'}${categories}. Please review our community guidelines.`, {
+            duration: 5000,
             icon: <AlertTriangle className="text-red-500" />,
           });
-
-          if (data.toxic_categories?.length > 0) {
-            toast.error(`Detected: ${data.toxic_categories.join(', ')}`, {
-              duration: 5000,
-            });
-          }
-
-          if (data.toxicity_score) {
-            toast(`Toxicity Score: ${(data.toxicity_score * 100).toFixed(1)}%`, {
-              icon: "📊",
-              duration: 4000,
-            });
-          }
         } else {
           toast.error(data.error || "Failed to add comment");
         }
@@ -267,6 +256,29 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       toast.error("Failed to add comment");
     } finally {
       setIsSubmittingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+
+    try {
+      const res = await fetch(`/api/posts/${post.id}/comments`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId }),
+      });
+
+      if (res.ok) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+        setCommentsCount((prev) => Math.max(0, prev - 1));
+        toast.success("Comment deleted successfully");
+      } else {
+        toast.error("Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete comment");
     }
   };
 
@@ -586,6 +598,17 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                           >
                             Reply
                           </button>
+                          {commentItem.user_id === user?.id && (
+                            <>
+                              <span>•</span>
+                              <button
+                                onClick={() => handleDeleteComment(commentItem.id)}
+                                className="hover:text-red-600 text-gray-500"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>

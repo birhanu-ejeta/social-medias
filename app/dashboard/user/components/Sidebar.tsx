@@ -29,11 +29,13 @@ export function Sidebar({ user }: SidebarProps) {
 
   const navigation = [
     { name: "Home", href: "/dashboard/user", icon: Home },
-    { name: "Profile", href: `/profile/${user.username}`, icon: User },
     { name: "Messages", href: "/messages", icon: MessageCircle },
     { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Saved", href: "/saved", icon: Bookmark },
-    { name: "Events", href: "/events", icon: Calendar },
+  ];
+
+  const profileSettings = [
+    { name: "Profile", href: `/profile/${user.username}`, icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
 
@@ -97,6 +99,30 @@ export function Sidebar({ user }: SidebarProps) {
                   {savedCount > 99 ? '99+' : savedCount}
                 </span>
               )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Profile & Settings Section */}
+      <nav className="space-y-1 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        {profileSettings.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition",
+                isActive
+                  ? "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700",
+              )}
+            >
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="truncate">{item.name}</span>
+              </div>
             </Link>
           );
         })}
