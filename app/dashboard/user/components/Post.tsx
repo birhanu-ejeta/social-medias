@@ -79,7 +79,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       const data = await res.json();
 
       setIsLiked(data.liked);
-      setLikesCount((prev) => (data.liked ? prev + 1 : prev - 1));
+      setLikesCount((prev: number) => (data.liked ? prev + 1 : prev - 1));
       
       // Trigger heartbeat animation when liked
       if (data.liked) {
