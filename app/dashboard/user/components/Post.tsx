@@ -327,32 +327,32 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 transition-all duration-200 hover:shadow-lg"
     >
       {/* Post Header */}
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="p-3 md:p-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
           <Link href={`/profile/${post.username}`}>
             <Avatar src={post.avatar_url} alt={post.username} size="md" />
           </Link>
-          <div>
-            <div className="flex items-center space-x-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center space-x-1 md:space-x-2 flex-wrap">
               <Link
                 href={`/profile/${post.username}`}
-                className="font-semibold hover:underline"
+                className="font-semibold hover:underline text-sm md:text-base truncate"
               >
                 {post.full_name || post.username}
               </Link>
               {post.is_verified && (
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Star className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
               )}
-              <span className="text-sm text-gray-500">
+              <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">
                 {formatDistanceToNow(new Date(post.created_at), {
                   addSuffix: true,
                 })}
               </span>
-              <span className="text-gray-400">
+              <span className="text-gray-400 flex-shrink-0">
                 {visibilityIcons[post.visibility]}
               </span>
             </div>
-            <p className="text-sm text-gray-500">@{post.username}</p>
+            <p className="text-xs md:text-sm text-gray-500 truncate">@{post.username}</p>
           </div>
         </div>
 
@@ -406,15 +406,15 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       </div>
 
       {/* Post Content */}
-      <div className="px-4 pb-2">
-        <p className="whitespace-pre-wrap">{post.content}</p>
+      <div className="px-3 md:px-4 pb-2">
+        <p className="whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {post.tags.map((tag: string) => (
               <Link
                 key={tag}
                 href={`/hashtag/${tag}`}
-                className="text-blue-500 hover:underline text-sm"
+                className="text-blue-500 hover:underline text-xs md:text-sm"
               >
                 #{tag}
               </Link>
@@ -438,7 +438,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
             <div
               key={index}
               className={`relative ${
-                post.media_urls.length === 1 ? "h-96" : "h-48"
+                post.media_urls.length === 1 ? "h-48 md:h-96" : "h-24 md:h-48"
               }`}
             >
               {post.media_types?.[index] === "video" ? (
@@ -463,35 +463,35 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       )}
 
       {/* Post Stats */}
-      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center space-x-4">
+      <div className="px-3 md:px-4 py-2 md:py-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between text-xs md:text-sm">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <button
               onClick={handleLike}
               className="flex items-center space-x-1 hover:text-red-500 transition-colors duration-200"
             >
               <Heart
-                className={`h-5 w-5 transition-all duration-200 ${
+                className={`h-4 w-4 md:h-5 md:w-5 transition-all duration-200 ${
                   showLikeAnimation ? 'animate-heartbeat' : ''
                 } ${isLiked ? "fill-red-500 text-red-500" : ""}`}
               />
-              <span className="font-medium">{likesCount}</span>
+              <span className="font-medium hidden sm:inline">{likesCount}</span>
             </button>
             <button
               onClick={() => setShowComments(!showComments)}
               className="flex items-center space-x-1 hover:text-blue-500 transition-colors duration-200"
             >
-              <MessageCircle className="h-5 w-5" />
-              <span className="font-medium">{commentsCount}</span>
+              <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="font-medium hidden sm:inline">{commentsCount}</span>
             </button>
             <button className="flex items-center space-x-1 hover:text-green-500 transition-colors duration-200">
-              <Share2 className="h-5 w-5" />
-              <span className="font-medium">{post.shares_count || 0}</span>
+              <Share2 className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="font-medium hidden sm:inline">{post.shares_count || 0}</span>
             </button>
           </div>
           <button onClick={handleSave}>
             <Bookmark
-              className={`h-5 w-5 ${isSaved ? "fill-purple-600 text-purple-600" : ""}`}
+              className={`h-4 w-4 md:h-5 md:w-5 ${isSaved ? "fill-purple-600 text-purple-600" : ""}`}
             />
           </button>
         </div>
@@ -507,7 +507,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
             className="border-t border-gray-200 dark:border-gray-700"
           >
             {/* Comment Input */}
-            <div className="p-4">
+            <div className="p-3 md:p-4">
               <form onSubmit={handleComment} className="flex space-x-2">
                 <Avatar src={post.avatar_url} alt="You" size="sm" />
                 <div className="flex-1 relative">
@@ -515,7 +515,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                     placeholder="Write a comment..."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    className="min-h-[40px] max-h-[80px] resize-none pr-12"
+                    className="min-h-[40px] max-h-[80px] resize-none pr-12 text-sm md:text-base"
                     rows={1}
                   />
                   <Button
@@ -535,7 +535,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
             </div>
 
             {/* Comments List */}
-            <div className="px-4 pb-4 space-y-3">
+            <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-3">
               {(showAllComments ? comments : comments.slice(0, 2)).map(
                 (commentItem: any) => (
                   <div key={commentItem.id} className="space-y-2">
