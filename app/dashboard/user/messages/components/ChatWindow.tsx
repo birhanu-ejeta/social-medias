@@ -149,8 +149,10 @@ export function ChatWindow({ userId }: ChatWindowProps) {
           fileInputRef.current.value = "";
         }
       } else if (data.blocked) {
-        // Blocked: clear input and show visual feedback
-        setNewMessage("");
+        // Blocked: clear input immediately and show visual feedback
+        console.log("[v0] Message blocked, clearing input");
+        setNewMessage(""); // Force clear
+        setTimeout(() => setNewMessage(""), 0); // Ensure it clears even if state is batched
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }

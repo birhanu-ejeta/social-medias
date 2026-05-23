@@ -345,32 +345,32 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 transition-all duration-200 hover:shadow-lg"
     >
       {/* Post Header */}
-      <div className="p-3 md:p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
+      <div className="px-2 sm:px-3 md:px-4 py-3 md:py-4 flex items-center justify-between gap-2">
+        <div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
           <Link href={`/profile/${post.username}`}>
-            <Avatar src={post.avatar_url} alt={post.username} size="md" />
+            <Avatar src={post.avatar_url} alt={post.username} size="sm" className="flex-shrink-0" />
           </Link>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center space-x-1 md:space-x-2 flex-wrap">
+            <div className="flex items-center space-x-1 gap-1 flex-wrap">
               <Link
                 href={`/profile/${post.username}`}
-                className="font-semibold hover:underline text-sm md:text-base truncate"
+                className="font-semibold hover:underline text-xs sm:text-sm md:text-base truncate"
               >
                 {post.full_name || post.username}
               </Link>
               {post.is_verified && (
-                <Star className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                <Star className="h-2.5 w-2.5 md:h-4 md:w-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
               )}
-              <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">
+              <span className="text-xs text-gray-500 whitespace-nowrap hidden sm:inline">
                 {formatDistanceToNow(new Date(post.created_at), {
                   addSuffix: true,
                 })}
               </span>
-              <span className="text-gray-400 flex-shrink-0">
+              <span className="text-gray-400 flex-shrink-0 text-xs md:text-sm">
                 {visibilityIcons[post.visibility]}
               </span>
             </div>
-            <p className="text-xs md:text-sm text-gray-500 truncate">@{post.username}</p>
+            <p className="text-xs text-gray-500 truncate">@{post.username}</p>
           </div>
         </div>
 
@@ -424,8 +424,8 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       </div>
 
       {/* Post Content */}
-      <div className="px-3 md:px-4 pb-2">
-        <p className="whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
+      <div className="px-2 sm:px-3 md:px-4 pb-2">
+        <p className="whitespace-pre-wrap text-xs sm:text-sm md:text-base break-words leading-relaxed">{post.content}</p>
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {post.tags.map((tag: string) => (
@@ -444,19 +444,21 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
       {/* Post Media */}
       {post.media_urls && post.media_urls.length > 0 && (
         <div
-          className={`grid ${
+          className={`grid gap-0.5 md:gap-1 w-full ${
             post.media_urls.length === 1
               ? "grid-cols-1"
               : post.media_urls.length === 2
                 ? "grid-cols-2"
                 : "grid-cols-3"
-          } gap-1`}
+          }`}
         >
           {post.media_urls.map((url: string, index: number) => (
             <div
               key={index}
-              className={`relative ${
-                post.media_urls.length === 1 ? "h-48 md:h-96" : "h-24 md:h-48"
+              className={`relative w-full bg-gray-900 ${
+                post.media_urls.length === 1 
+                  ? "h-40 sm:h-56 md:h-96" 
+                  : "h-32 sm:h-40 md:h-48"
               }`}
             >
               {post.media_types?.[index] === "video" ? (
@@ -471,7 +473,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                   src={url}
                   alt={`Post media ${index + 1}`}
                   fill
-                  className="object-cover cursor-pointer hover:opacity-95 transition"
+                  className="object-cover cursor-pointer hover:opacity-90 transition w-full h-full"
                   onClick={() => window.open(url, "_blank")}
                 />
               )}
@@ -598,7 +600,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                           >
                             Reply
                           </button>
-                          {commentItem.user_id === user?.id && (
+                          {commentItem.user_id === currentUserId && (
                             <>
                               <span>•</span>
                               <button

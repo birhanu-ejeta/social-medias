@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Menu, X, Home, Heart, MessageCircle, User, LogOut, Settings } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export function MobileMenu() {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -52,14 +54,16 @@ export function MobileMenu() {
               <span>Messages</span>
             </Link>
             <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
-            <Link
-              href="/profile/[username]"
-              className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              <User className="h-5 w-5" />
-              <span>Profile</span>
-            </Link>
+            {session?.user ? (
+              <Link
+                href={`/profile/${session.user.username || session.user.email?.split('@')[0]}`}
+                className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                <span>Profile</span>
+              </Link>
+            ) : null}
             <Link
               href="/settings"
               className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
