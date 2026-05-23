@@ -8,6 +8,7 @@ import { Stories } from "./components/Stories";
 import { Sidebar } from "./components/Sidebar";
 import { CreatePost } from "./components/CreatePost";
 import { TrendingSidebar } from "./components/TrendingSidebar";
+import { MobileMenu } from "@/components/MobileMenu";
 
 export default function UserDashboard() {
   const { data: session, status } = useSession();
@@ -28,27 +29,34 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
-          {/* Left Sidebar - Hidden on Mobile */}
-          <div className="hidden lg:block lg:col-span-3">
-            <Sidebar user={session.user} />
-          </div>
+      {/* Mobile Menu */}
+      <MobileMenu />
 
-          {/* Main Content */}
-          <div className="col-span-1 lg:col-span-6">
-            <div className="hidden lg:block mb-6">
-              <Stories />
+      {/* Add padding for mobile menu on mobile screens */}
+      <div className="pt-[60px] lg:pt-0">
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
+            {/* Left Sidebar - Hidden on Mobile */}
+            <div className="hidden lg:block lg:col-span-3">
+              <Sidebar user={session.user} />
             </div>
-            <div className="hidden lg:block mb-6">
-              <CreatePost user={session.user} onPostCreated={handlePostCreated} />
-            </div>
-            <Feed key={feedKey} userId={session.user.id} />
-          </div>
 
-          {/* Right Sidebar - Trending & Suggestions - Hidden on Mobile */}
-          <div className="hidden lg:block lg:col-span-3">
-            <TrendingSidebar />
+            {/* Main Content */}
+            <div className="col-span-1 lg:col-span-6">
+              <div className="hidden lg:block mb-6">
+                <Stories />
+              </div>
+              {/* Show CreatePost on all screen sizes */}
+              <div className="mb-6">
+                <CreatePost user={session.user} onPostCreated={handlePostCreated} />
+              </div>
+              <Feed key={feedKey} userId={session.user.id} />
+            </div>
+
+            {/* Right Sidebar - Trending & Suggestions - Hidden on Mobile */}
+            <div className="hidden lg:block lg:col-span-3">
+              <TrendingSidebar />
+            </div>
           </div>
         </div>
       </div>

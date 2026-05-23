@@ -62,6 +62,7 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState<Record<string, string>>({});
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
+  const [commentBlocked, setCommentBlocked] = useState(false);
 
   const visibilityIcons = {
     public: <Globe className="h-4 w-4" />,
@@ -222,6 +223,11 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
 
       if (!res.ok) {
         if (data.blocked) {
+          // Set blocked state for visual feedback
+          setCommentBlocked(true);
+          setComment("");
+          setTimeout(() => setCommentBlocked(false), 2000);
+          
           toast.error(data.error, {
             duration: 6000,
             icon: <AlertTriangle className="text-red-500" />,
@@ -515,7 +521,9 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                     placeholder="Write a comment..."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    className="min-h-[40px] max-h-[80px] resize-none pr-12 text-sm md:text-base"
+                    className={`min-h-[40px] max-h-[80px] resize-none pr-12 text-sm md:text-base transition-all ${
+                      commentBlocked ? 'border-red-500 bg-red-50 dark:bg-red-950' : ''
+                    }`}
                     rows={1}
                   />
                   <Button
@@ -532,6 +540,14 @@ export function Post({ post, currentUserId, onUpdate, onSave, onDelete }: PostPr
                   </Button>
                 </div>
               </form>
+              
+              {/* Comment Blocked Indicator */}
+              {commentBlocked && (
+                <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 animate-slideInUp text-xs">
+                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-red-600 dark:text-red-400">Your comment was blocked for inappropriate content and has been cleared.</p>
+                </div>
+              )}
             </div>
 
             {/* Comments List */}

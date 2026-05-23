@@ -30,6 +30,7 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -112,8 +113,14 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
       if (!response.ok) {
         // MODERATION VIOLATION HANDLING
         if (data.blocked) {
+          // Set blocked state for visual feedback
+          setIsBlocked(true);
+          
           // Immediately clear the input and apply visual feedback
           clearInputOnViolation();
+          
+          // Reset blocked state after animation
+          setTimeout(() => setIsBlocked(false), 2000);
           
           // Show primary error message
           toast.error(data.error, {
@@ -204,12 +211,25 @@ export function CreatePost({ user, onPostCreated }: CreatePostProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onFocus={() => setIsExpanded(true)}
-              className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 transition-all ${
-                isShaking ? 'animate-shake border-red-500' : 'border-gray-200 dark:border-gray-700'
+              className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 dark:bg-gray-700 transition-all ${
+                isShaking ? 'animate-shake border-red-500 focus:ring-red-500' : 
+                isBlocked ? 'border-red-500 focus:ring-red-500 bg-red-50 dark:bg-red-950' :
+                'border-gray-200 dark:border-gray-700 focus:ring-purple-600'
               }`}
               rows={isExpanded ? 4 : 1}
               disabled={isSubmitting}
             />
+
+            {/* Blocked Status Indicator */}
+            {isBlocked && (
+              <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 animate-slideInUp">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-red-600 dark:text-red-400">Content Blocked</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">Your post contains inappropriate content and has been cleared. Please review our community guidelines.</p>
+                </div>
+              </div>
+            )}
 
             {/* Upload Progress Bar */}
             {isUploading && (
