@@ -13,6 +13,7 @@ import {
   Info,
   Image as ImageIcon,
   Paperclip,
+  AlertTriangle,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -47,6 +48,7 @@ export function ChatWindow({ userId }: ChatWindowProps) {
   const [otherUser, setOtherUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [messageBlocked, setMessageBlocked] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -120,21 +122,32 @@ export function ChatWindow({ userId }: ChatWindowProps) {
         mediaUrl = uploadData.url;
       }
 
-      const response = await fetch("/api/messages/send", {
+      const response = await fetch(`/api/messages/conversations/${chatId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chatId,
           content: newMessage,
+          messageType: mediaUrl ? 'image' : 'text',
           mediaUrl,
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
+        // Success: clear input
         setNewMessage("");
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
+      } else if (data.blocked) {
+        // Blocked: clear input and show visual feedback
+        setNewMessage("");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        setMessageBlocked(true);
+        setTimeout(() => setMessageBlocked(false), 2000);
       }
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -306,7 +319,9 @@ export function ChatWindow({ userId }: ChatWindowProps) {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="min-h-[40px] max-h-[120px] resize-none"
+              className={`min-h-[40px] max-h-[120px] resize-none transition-all ${
+                messageBlocked ? 'border-red-500 bg-red-50 dark:bg-red-950' : ''
+              }`}
             />
           </div>
           <Button
@@ -319,6 +334,14 @@ export function ChatWindow({ userId }: ChatWindowProps) {
             <Send className="h-5 w-5" />
           </Button>
         </div>
+        
+        {/* Message Blocked Indicator */}
+        {messageBlocked && (
+          <div className="mt-2 p-2 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 animate-slideInUp text-sm">
+            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-red-600 dark:text-red-400">Your message was blocked for inappropriate content.</p>
+          </div>
+        )}
       </div>
     </div>
   );

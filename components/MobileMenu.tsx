@@ -36,12 +36,12 @@ export function MobileMenu() {
               <span>Home</span>
             </Link>
             <Link
-              href="/search"
+              href="/dashboard/user/explore"
               className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
               onClick={() => setIsOpen(false)}
             >
               <Search className="h-5 w-5" />
-              <span>Search</span>
+              <span>Explore</span>
             </Link>
             <Link
               href="/notifications"
@@ -60,7 +60,7 @@ export function MobileMenu() {
               <span>Messages</span>
             </Link>
             <Link
-              href="/profile"
+              href="/dashboard/user/profile"
               className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700"
               onClick={() => setIsOpen(false)}
             >

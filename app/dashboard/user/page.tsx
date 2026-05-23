@@ -43,7 +43,7 @@ export default function UserDashboard() {
 
             {/* Main Content */}
             <div className="col-span-1 lg:col-span-6">
-              <div className="hidden lg:block mb-6">
+              <div className="mb-6">
                 <Stories />
               </div>
               {/* Show CreatePost on all screen sizes */}

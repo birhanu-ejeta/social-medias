@@ -21,8 +21,6 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '50');
     const before = searchParams.get('before') || undefined;
 
-    console.log(`[MESSAGES] Fetching messages for conversation ${params.conversationId}`);
-
     const messages = await messageQueries.getMessages(
       params.conversationId,
       session.user.id,
@@ -45,12 +43,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { conversationId: string } }
 ) {
-  console.log('\n========== NEW GROUP CHAT MESSAGE ==========');
-  
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      console.log('❌ No session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -66,16 +61,12 @@ export async function POST(
       replyToId 
     } = body;
 
-    console.log(`📝 Content: ${content}`);
-    console.log(`💬 Conversation: ${params.conversationId}`);
-    console.log(`📁 Type: ${messageType}`);
-
     // Validate content
     if (!content && !mediaUrl) {
       return NextResponse.json({ error: 'Message content required' }, { status: 400 });
     }
 
-    // 🛡️ MODERATION CHECK (only for text messages)
+    // MODERATION CHECK (only for text messages)
     let moderation: ModerationResult = { 
       allowed: true, 
       message: null, 
@@ -87,11 +78,9 @@ export async function POST(
 
     if (content && messageType === 'text') {
       try {
-        console.log('🛡️ Running moderation...');
         moderation = await moderateContent(content.trim());
-        console.log(`🛡️ Result: ${moderation.allowed ? 'ALLOWED' : 'BLOCKED'} | Score: ${moderation.score}`);
       } catch (modError) {
-        console.error('⚠️ [MODERATION] Error:', modError);
+        console.error('[MODERATION] Error:', modError);
         // Fail-open: allow message if moderation service is down
         moderation = { 
           allowed: true, 
@@ -106,20 +95,15 @@ export async function POST(
 
     // Block toxic messages
     if (!moderation.allowed) {
-      console.log('🚫 MESSAGE BLOCKED');
       return NextResponse.json({
-        error: moderation.message || "⚠️ Your message contains hate speech and cannot be sent.",
+        error: moderation.message || "Your message contains inappropriate content and cannot be sent.",
         blocked: true,
         toxicity_score: moderation.score,
         toxic_categories: moderation.categories
       }, { status: 403 });
     }
 
-    console.log('✅ Moderation passed');
-
-    // 💾 SAVE MESSAGE
-    console.log('💾 Saving message to database...');
-    
+    // SAVE MESSAGE
     const message = await messageQueries.sendMessage(
       params.conversationId,
       session.user.id,
@@ -134,11 +118,8 @@ export async function POST(
     );
 
     if (!message) {
-      console.error('❌ messageQueries.sendMessage returned null');
       return NextResponse.json({ error: 'Failed to save message' }, { status: 500 });
     }
-
-    console.log(`✅ Message saved with ID: ${message.id}`);
 
     // Add warning flag if message was flagged but allowed
     const messageWithWarning = {
@@ -146,11 +127,9 @@ export async function POST(
       warning: moderation.flagged ? moderation.message : null,
     };
 
-    // 📡 PUSHER NOTIFICATIONS
+    // PUSHER NOTIFICATIONS
     if (pusherServer) {
       try {
-        console.log('📡 Broadcasting to Pusher...');
-        
         // Broadcast to conversation channel
         await pusherServer.trigger(
           `conversation-${params.conversationId}`,
@@ -174,23 +153,18 @@ export async function POST(
             }
           }
         }
-        
-        console.log('✅ Pusher notifications sent');
       } catch (pusherError) {
-        console.error('⚠️ Pusher error (non-critical):', pusherError);
+        console.error('[Pusher] Error sending notifications:', pusherError);
         // Don't fail the request if Pusher fails
       }
     }
 
-    console.log('========== MESSAGE SENT SUCCESSFULLY ==========\n');
     return NextResponse.json(messageWithWarning);
 
   } catch (error: any) {
-    console.error('❌❌❌ CRITICAL ERROR:', error);
-    console.error('Stack:', error.stack);
+    console.error('[Messages API] Error:', error.message);
     return NextResponse.json({ 
-      error: 'Failed to send message',
-      details: error.message 
+      error: 'Failed to send message'
     }, { status: 500 });
   }
 }
